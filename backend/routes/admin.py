@@ -24,6 +24,8 @@ def list_providers():
 
 @admin_bp.route("/providers/<name>", methods=["PUT"])
 def update_provider(name):
+    if name not in AVAILABLE_MODELS:
+        return jsonify({"error": "Unknown provider"}), 400
     data = request.get_json()
     upsert_provider(
         name,
@@ -43,7 +45,7 @@ def get_app_settings():
 @admin_bp.route("/settings", methods=["PUT"])
 def update_settings():
     data = request.get_json()
-    for key in ["judge_provider", "judge_model", "judge_prompt_id"]:
+    for key in ["judge_provider", "judge_model", "judge_prompt_id", "judge_additional_instruction"]:
         if key in data:
             set_setting(key, data[key])
     return jsonify({"status": "ok"})

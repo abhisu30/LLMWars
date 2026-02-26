@@ -4,4 +4,4 @@ psycopg2-binary>=2.9
 requests>=2.31
 openpyxl>=3.1
 python-dotenv>=1.0
-google-generativeai>=0.8
+google-genai>=1.0

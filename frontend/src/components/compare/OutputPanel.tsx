@@ -1,4 +1,6 @@
 import { Clock, AlertCircle } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import type { LLMResult } from "../../api/compare.ts";
 
 interface Props {
@@ -31,9 +33,11 @@ export function OutputPanel({ result, label }: Props) {
             <p className="text-sm">{result.error}</p>
           </div>
         ) : (
-          <pre className="text-sm whitespace-pre-wrap break-words font-sans leading-relaxed">
-            {result.text}
-          </pre>
+          <div className="markdown-body">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {result.text}
+            </ReactMarkdown>
+          </div>
         )}
       </div>
     </div>

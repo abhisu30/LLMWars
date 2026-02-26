@@ -77,15 +77,19 @@ def submit_score():
     require_fields(data, ["run_prompt_id", "scores"])
 
     scores = data["scores"]
-    if not isinstance(scores, list):
-        return jsonify({"error": "Scores must be a list"}), 400
+    if not isinstance(scores, list) or len(scores) == 0:
+        return jsonify({"error": "Scores must be a non-empty list"}), 400
 
+    num_models = len(scores)
     for s in scores:
         require_fields(s, ["model_label", "score", "comment"])
+        score_val = s["score"]
+        if not isinstance(score_val, int) or score_val < 1 or score_val > num_models:
+            return jsonify({"error": f"Score must be an integer between 1 and {num_models}"}), 400
         save_score(
             run_prompt_id=data["run_prompt_id"],
             model_label=s["model_label"],
-            score=s["score"],
+            score=score_val,
             comment=s["comment"],
         )
 

@@ -1,5 +1,8 @@
 import json
+import logging
 import time
+
+logger = logging.getLogger(__name__)
 
 from llmcalls import call_llm
 from models import get_setting, get_provider, save_judge_result
@@ -10,6 +13,7 @@ def run_judge(run_prompt_id, outputs, user_prompt, num_models):
     judge_provider = get_setting("judge_provider") or "openai"
     judge_model = get_setting("judge_model") or "gpt-4o"
     judge_prompt_id = get_setting("judge_prompt_id") or "JG001V1"
+    judge_additional_instruction = get_setting("judge_additional_instruction") or ""
 
     provider_config = get_provider(judge_provider)
     if not provider_config or not provider_config.get("api_key"):
@@ -28,12 +32,32 @@ def run_judge(run_prompt_id, outputs, user_prompt, num_models):
         model_outputs_text += output.get("output_text") or output.get("text", "[No output]")
         model_outputs_text += "\n"
 
+    evaluations_example = ", ".join(
+        f'{{"model_label": "{label}", "score": <int 1-{max_score}>, "comment": "<brief 1-2 sentence assessment>"}}'
+        for label in labels
+    )
+    output_format_example = (
+        f'{{"evaluations": [{evaluations_example}], '
+        f'"winner": "<Model label with highest score>", '
+        f'"judge_reasoning": "<1-2 sentence summary of why the winner was chosen>"}}'
+    )
+
     formatted_prompt = prompt_template["full_prompt"].format(
         user_prompt=user_prompt,
         num_models=num_models,
         max_score=max_score,
         model_outputs=model_outputs_text,
+        output_format_example=output_format_example,
     )
+
+    if judge_additional_instruction.strip():
+        formatted_prompt += f"\n\n# Additional Instruction (HIGH PRIORITY)\n{judge_additional_instruction.strip()}"
+
+    print("\n" + "="*60)
+    print(f"[JUDGE] provider={judge_provider}  model={judge_model}  prompt_id={judge_prompt_id}")
+    print("-"*60)
+    print(formatted_prompt)
+    print("="*60 + "\n")
 
     start = time.time()
     result = call_llm(
@@ -59,9 +83,11 @@ def run_judge(run_prompt_id, outputs, user_prompt, num_models):
             try:
                 judge_output = json.loads(text[start_idx:end_idx])
             except json.JSONDecodeError:
-                judge_output = {"raw_response": result["text"], "parse_error": True}
+                logger.error("Judge output parse failed for run_prompt_id=%s", run_prompt_id)
+                judge_output = {"parse_error": True}
         else:
-            judge_output = {"raw_response": result["text"], "parse_error": True}
+            logger.error("Judge output parse failed for run_prompt_id=%s", run_prompt_id)
+            judge_output = {"parse_error": True}
 
     save_judge_result(
         run_prompt_id=run_prompt_id,

@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask
 from flask_cors import CORS
 
@@ -9,7 +11,11 @@ from utils.errors import register_error_handlers
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
-    CORS(app)
+    origins = os.environ.get(
+        "CORS_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173"
+    ).split(",")
+    CORS(app, origins=[o.strip() for o in origins])
 
     with app.app_context():
         init_db()
@@ -24,9 +30,16 @@ def create_app():
 
     register_error_handlers(app)
 
+    @app.after_request
+    def set_security_headers(response):
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        return response
+
     return app
 
 
 if __name__ == "__main__":
     app = create_app()
-    app.run(debug=True, port=5000)
+    app.run(port=5000)

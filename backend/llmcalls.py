@@ -1,6 +1,7 @@
 import sys
 import requests
-import google.generativeai as genai
+from google import genai
+from google.genai import types as genai_types
 
 
 def _check_response(resp, provider: str):
@@ -101,13 +102,15 @@ def call_openai(prompt, user_input, model, api_key, endpoint=None, **kwargs):
 
 
 def call_gemini(prompt, user_input, model, api_key, endpoint=None, **kwargs):
-    genai.configure(api_key=api_key)
-    gen_model = genai.GenerativeModel(
-        model_name=model,
+    client = genai.Client(api_key=api_key)
+    config = genai_types.GenerateContentConfig(
         system_instruction=prompt if prompt else None,
     )
-    full_input = user_input
-    response = gen_model.generate_content(full_input)
+    response = client.models.generate_content(
+        model=model,
+        contents=user_input,
+        config=config,
+    )
     return {
         "text": response.text,
         "usage": {

@@ -10,6 +10,7 @@ export function JudgeConfig() {
 
   const [judgeProvider, setJudgeProvider] = useState("");
   const [judgeModel, setJudgeModel] = useState("");
+  const [judgeAdditionalInstruction, setJudgeAdditionalInstruction] = useState("");
   const [models, setModels] = useState<ModelInfo[]>([]);
   const [saved, setSaved] = useState(false);
 
@@ -17,6 +18,7 @@ export function JudgeConfig() {
     if (settings) {
       setJudgeProvider(settings.judge_provider || "");
       setJudgeModel(settings.judge_model || "");
+      setJudgeAdditionalInstruction(settings.judge_additional_instruction || "");
     }
   }, [settings]);
 
@@ -31,6 +33,7 @@ export function JudgeConfig() {
       updateSettings({
         judge_provider: judgeProvider,
         judge_model: judgeModel,
+        judge_additional_instruction: judgeAdditionalInstruction,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["settings"] });
@@ -83,6 +86,22 @@ export function JudgeConfig() {
               </option>
             ))}
           </select>
+        </div>
+
+        <div>
+          <label className="text-sm text-[hsl(var(--muted-foreground))] mb-1 block">
+            Additional Instruction <span className="text-xs opacity-60">(optional)</span>
+          </label>
+          <textarea
+            value={judgeAdditionalInstruction}
+            onChange={(e) => setJudgeAdditionalInstruction(e.target.value)}
+            placeholder="e.g. Prioritize conciseness. Penalize responses that repeat the question."
+            rows={3}
+            className="w-full rounded-md border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 text-sm resize-y"
+          />
+          <p className="text-xs text-[hsl(var(--muted-foreground))] mt-1">
+            Appended to the judge prompt as a high-priority instruction. Leave blank to use the default prompt as-is.
+          </p>
         </div>
 
         <button

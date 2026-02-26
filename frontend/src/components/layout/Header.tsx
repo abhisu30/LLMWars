@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { ThemeToggle } from "./ThemeToggle.tsx";
-import { GitCompareArrows } from "lucide-react";
+import { Swords } from "lucide-react";
 
 export function Header() {
   const location = useLocation();
@@ -16,8 +16,8 @@ export function Header() {
       <div className="flex items-center justify-between px-6 h-14">
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-2 font-semibold text-lg">
-            <GitCompareArrows size={22} className="text-[hsl(var(--primary))]" />
-            LLM Compare
+            <Swords size={22} className="text-[hsl(var(--primary))]" />
+            LLMWars
           </Link>
           <nav className="flex items-center gap-1">
             {navLinks.map((link) => (

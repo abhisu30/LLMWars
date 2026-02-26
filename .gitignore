@@ -1,24 +1,42 @@
+# Secrets — never commit credentials
+.env
+.env.*
+!.env.example
+!.env.sample
+
 # Python
 __pycache__/
 *.py[cod]
 *.egg-info/
 venv/
-.env
+.venv/
+*.pyo
 
 # Node
 node_modules/
 dist/
+.pnp/
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*.sublime-*
 
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # Build
 *.egg
 *.whl
+build/
+
+# Logs
+*.log
+
+# Database
+*.sqlite
+*.db

@@ -1,5 +1,9 @@
 # LLM Compare
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![CI](https://github.com/abhisu30/LLMWars/actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
+
 A modular web application for comparing outputs from 2-3 LLMs side by side, with mandatory scoring, optional AI judging, and CSV/XLSX export.
 
 ## Tech Stack
@@ -177,6 +181,16 @@ LLMWars/
 | Anthropic Claude | Claude Sonnet 4.6, Claude Haiku 4.5, Claude Opus 4.6 |
 | xAI Grok | Grok 3, Grok 3 Mini |
 
+## Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, code conventions, and how to add a new LLM provider.
+
+To report a **security vulnerability**, see [SECURITY.md](SECURITY.md) — do not open a public issue.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release history.
+
 ## License
 
-Open source. See LICENSE file for details.
+MIT — see [LICENSE](LICENSE) for details.

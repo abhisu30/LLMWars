@@ -19,7 +19,7 @@ Score each model output on a scale of 1 to {max_score} where {max_score} is the 
 
 # Output Format
 Return ONLY a valid JSON object with no additional text:
-{{"evaluations": [{{"model_label": "Model A", "score": <int 1-{max_score}>, "comment": "<brief 1-2 sentence assessment>"}}, {{"model_label": "Model B", "score": <int 1-{max_score}>, "comment": "<brief 1-2 sentence assessment>"}}], "winner": "<Model label with highest score>", "judge_reasoning": "<1-2 sentence summary of why the winner was chosen>"}}
+{output_format_example}
 
 # Important
 - Be objective. Do not favor verbose or short answers by default.
@@ -54,7 +54,7 @@ Score each model output on a scale of 1 to {max_score} where {max_score} is the 
 
 # Output Format
 Return ONLY a valid JSON object with no additional text:
-{{"evaluations": [{{"model_label": "Model A", "score": <int 1-{max_score}>, "comment": "<brief 1-2 sentence assessment>"}}, {{"model_label": "Model B", "score": <int 1-{max_score}>, "comment": "<brief 1-2 sentence assessment>"}}], "winner": "<Model label with highest score>", "judge_reasoning": "<1-2 sentence summary of why the winner was chosen>"}}
+{output_format_example}
 
 # Important
 - Focus on correctness first, then code quality.
