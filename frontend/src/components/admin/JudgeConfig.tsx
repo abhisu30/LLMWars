@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchProviders, fetchSettings, updateSettings, fetchModels, type ModelInfo } from "../../api/admin.ts";
+import { fetchProviders, fetchSettings, updateSettings, fetchModels } from "../../api/admin.ts";
 import { Save, CheckCircle } from "lucide-react";
 
 export function JudgeConfig() {
@@ -8,25 +8,23 @@ export function JudgeConfig() {
   const { data: providers } = useQuery({ queryKey: ["providers"], queryFn: fetchProviders });
   const { data: settings } = useQuery({ queryKey: ["settings"], queryFn: fetchSettings });
 
-  const [judgeProvider, setJudgeProvider] = useState("");
-  const [judgeModel, setJudgeModel] = useState("");
-  const [judgeAdditionalInstruction, setJudgeAdditionalInstruction] = useState("");
-  const [models, setModels] = useState<ModelInfo[]>([]);
+  // Track only what the user has explicitly changed; fall back to server values otherwise
+  const [edits, setEdits] = useState<{
+    provider?: string;
+    model?: string;
+    instruction?: string;
+  }>({});
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => {
-    if (settings) {
-      setJudgeProvider(settings.judge_provider || "");
-      setJudgeModel(settings.judge_model || "");
-      setJudgeAdditionalInstruction(settings.judge_additional_instruction || "");
-    }
-  }, [settings]);
+  const judgeProvider = edits.provider ?? settings?.judge_provider ?? "";
+  const judgeModel = edits.model ?? settings?.judge_model ?? "";
+  const judgeAdditionalInstruction = edits.instruction ?? settings?.judge_additional_instruction ?? "";
 
-  useEffect(() => {
-    if (judgeProvider) {
-      fetchModels(judgeProvider).then(setModels);
-    }
-  }, [judgeProvider]);
+  const { data: models = [] } = useQuery({
+    queryKey: ["models", judgeProvider],
+    queryFn: () => fetchModels(judgeProvider),
+    enabled: !!judgeProvider,
+  });
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -36,6 +34,7 @@ export function JudgeConfig() {
         judge_additional_instruction: judgeAdditionalInstruction,
       }),
     onSuccess: () => {
+      setEdits({});
       queryClient.invalidateQueries({ queryKey: ["settings"] });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
@@ -55,8 +54,8 @@ export function JudgeConfig() {
           <select
             value={judgeProvider}
             onChange={(e) => {
-              setJudgeProvider(e.target.value);
-              setJudgeModel("");
+              const provider = e.target.value;
+              setEdits((prev) => ({ ...prev, provider, model: "" }));
             }}
             className="w-full rounded-md border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 text-sm"
           >
@@ -75,7 +74,7 @@ export function JudgeConfig() {
           </label>
           <select
             value={judgeModel}
-            onChange={(e) => setJudgeModel(e.target.value)}
+            onChange={(e) => setEdits((prev) => ({ ...prev, model: e.target.value }))}
             className="w-full rounded-md border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 text-sm"
             disabled={!judgeProvider}
           >
@@ -94,7 +93,7 @@ export function JudgeConfig() {
           </label>
           <textarea
             value={judgeAdditionalInstruction}
-            onChange={(e) => setJudgeAdditionalInstruction(e.target.value)}
+            onChange={(e) => setEdits((prev) => ({ ...prev, instruction: e.target.value }))}
             placeholder="e.g. Prioritize conciseness. Penalize responses that repeat the question."
             rows={3}
             className="w-full rounded-md border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 text-sm resize-y"

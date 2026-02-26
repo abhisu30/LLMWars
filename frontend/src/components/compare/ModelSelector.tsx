@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchProviders, fetchModels, type ModelInfo } from "../../api/admin.ts";
+import { fetchProviders, fetchModels } from "../../api/admin.ts";
 import type { ModelSelection } from "../../api/compare.ts";
 
 interface Props {
@@ -13,17 +13,14 @@ interface Props {
 export function ModelSelector({ label, value, onChange, optional }: Props) {
   const { data: providers } = useQuery({ queryKey: ["providers"], queryFn: fetchProviders });
   const [selectedProvider, setSelectedProvider] = useState(value?.provider || "");
-  const [models, setModels] = useState<ModelInfo[]>([]);
 
   const activeProviders = providers?.filter((p) => p.is_active && p.api_key) || [];
 
-  useEffect(() => {
-    if (selectedProvider) {
-      fetchModels(selectedProvider).then(setModels);
-    } else {
-      setModels([]);
-    }
-  }, [selectedProvider]);
+  const { data: models = [] } = useQuery({
+    queryKey: ["models", selectedProvider],
+    queryFn: () => fetchModels(selectedProvider),
+    enabled: !!selectedProvider,
+  });
 
   return (
     <div className="flex items-center gap-2">
