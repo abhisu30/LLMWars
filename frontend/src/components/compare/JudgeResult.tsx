@@ -27,7 +27,7 @@ export function JudgeResult({ result, loading }: Props) {
   }
 
   const data = result.result;
-  if (!data) return null;
+  if (!data || !data.evaluations) return null;
 
   return (
     <div className="p-4 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] space-y-3">

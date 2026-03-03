@@ -6,6 +6,16 @@
 
 A modular web application for comparing outputs from 2-3 LLMs side by side, with mandatory scoring, optional AI judging, and CSV/XLSX export.
 
+## IMPORTANT: Localhost-Only (Security Warning)
+
+This repository is intended to run on a single machine for a single user on `localhost` (for example, Vite on `http://localhost:5173` and Flask on `http://localhost:5000`).
+
+It is **not hardened for multi-user or network-accessible deployments**. In particular, this version does not include strong protections you would expect for a public or shared environment (for example: authentication/authorization on admin endpoints, strict endpoint allowlists, rate limiting, and other hardening).
+
+Do **not** deploy this version to the public internet. If you need wider/internal-server deployment, treat this as a prototype and add the necessary security controls first.
+
+Future versions may plug these gaps and add safer defaults, but you should not assume security hardening unless it is explicitly documented.
+
 ## Tech Stack
 
 - **Backend:** Python Flask (REST API)

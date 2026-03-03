@@ -37,6 +37,9 @@ export function ComparePage() {
   const [runPromptId, setRunPromptId] = useState<number | null>(null);
   const [scored, setScored] = useState(false);
 
+  // Autorun scored prompt tracking (local, cleared on each new run)
+  const [scoredPromptIds, setScoredPromptIds] = useState<Set<number>>(new Set());
+
   // Autorun
   const autorun = useAutorun();
 
@@ -58,6 +61,7 @@ export function ComparePage() {
     setRunPromptId(null);
     setScored(false);
     setJudgeResult(null);
+    setScoredPromptIds(new Set());
 
     if (mode === "single") {
       const res = await compareMutation.mutateAsync({
@@ -190,17 +194,47 @@ export function ComparePage() {
             Prompt {p.sequence_num}: <span className="font-normal text-[hsl(var(--muted-foreground))]">{p.prompt_text}</span>
           </p>
           {p.outputs?.length > 0 && (
-            <CompareGrid
-              results={p.outputs.map((o) => ({
-                text: o.output_text,
-                usage: {},
-                model: o.model,
-                provider: o.provider,
-                error: o.error,
-                latency_ms: o.latency_ms,
-                output_id: o.id,
-              }))}
-            />
+            <>
+              <CompareGrid
+                results={p.outputs.map((o) => ({
+                  text: o.output_text,
+                  usage: {},
+                  model: o.model,
+                  provider: o.provider,
+                  error: o.error,
+                  latency_ms: o.latency_ms,
+                  output_id: o.id,
+                }))}
+              />
+
+              {/* Judge Result */}
+              {judgeEnabled && p.judge_results.length > 0 && (
+                <JudgeResult
+                  result={{
+                    result: p.judge_results[0].result_json as JudgeResponse["result"],
+                    latency_ms: p.judge_results[0].latency_ms,
+                  }}
+                />
+              )}
+              {judgeEnabled && p.judge_results.length === 0 && autorun.status?.status === "running" && (
+                <JudgeResult result={null} loading />
+              )}
+
+              {/* Scoring */}
+              {!scoredPromptIds.has(p.id) && p.scores.length === 0 ? (
+                <ScoringForm
+                  runPromptId={p.id}
+                  modelCount={modelCount}
+                  modelLabels={labels}
+                  onScored={() => setScoredPromptIds((prev) => new Set([...prev, p.id]))}
+                />
+              ) : (
+                <div className="flex items-center gap-2 p-3 rounded-lg border border-green-500/30 bg-green-500/10 text-sm text-green-600 dark:text-green-400">
+                  <ArrowRight size={16} />
+                  Scores submitted for Prompt {p.sequence_num}
+                </div>
+              )}
+            </>
           )}
         </div>
       ))}

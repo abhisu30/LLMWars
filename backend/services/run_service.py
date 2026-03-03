@@ -60,12 +60,20 @@ def execute_comparison(prompt_text, models_config, run_prompt_id):
 
 def start_autorun(run_id, prompts, models_config, judge_enabled=False):
     """Start autorun in a background thread. Processes prompts sequentially."""
+    from services.judge_service import run_judge
 
     def _run():
         try:
             for i, prompt_text in enumerate(prompts):
                 run_prompt_id = add_run_prompt(run_id, prompt_text, sequence_num=i + 1)
-                execute_comparison(prompt_text, models_config, run_prompt_id)
+                results = execute_comparison(prompt_text, models_config, run_prompt_id)
+                if judge_enabled and results:
+                    run_judge(
+                        run_prompt_id=run_prompt_id,
+                        outputs=results,
+                        user_prompt=prompt_text,
+                        num_models=len(results),
+                    )
             update_run_status(run_id, "completed")
         except Exception:
             update_run_status(run_id, "failed")

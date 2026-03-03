@@ -45,6 +45,7 @@ export interface AutorunStatusResponse {
     }>;
     judge_results: Array<{
       result_json: Record<string, unknown>;
+      latency_ms: number;
     }>;
   }>;
 }
